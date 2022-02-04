@@ -5,18 +5,12 @@ import static org.assertj.core.api.Assertions.*;
 import java.time.Duration;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
-
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
 @QuarkusTest
 @QuarkusTestResource(KafkaProducerResource.class)
@@ -24,12 +18,12 @@ class FruitListenerTests {
 	@InjectKafkaProducer
 	KafkaProducer<String, Fruit> fruitsProducer;
 
-	@Inject
-	@Channel("fruits-persisted")
-	Multi<Fruit> persistedFruitsChannel;
+//	@Inject
+//	@Channel("fruits-persisted")
+//	Multi<Fruit> persistedFruitsChannel;
 
 	@Test
-	public void itemsPersist() {
+	public void itemsPersist() throws InterruptedException {
 		assertThat(Fruit.count().await().atMost(Duration.ofSeconds(5)))
 			.isNotNull()
 			.isZero();
@@ -40,16 +34,17 @@ class FruitListenerTests {
 			.forEach(fruitsProducer::send);
 
 		// Wait for the messages to arrive on the outgoing channel
-		var fruitsFromChannel = this.persistedFruitsChannel
-			.select().first(2L)
-			.subscribe().withSubscriber(AssertSubscriber.create(2L))
-			.assertSubscribed()
-			.awaitItems(2, Duration.ofMinutes(1))
-			.assertCompleted()
-			.getItems();
-
-		// Check the fruits I got from the channel
-		checkFruits(fruitsFromChannel);
+//		var fruitsFromChannel = this.persistedFruitsChannel
+//			.select().first(2L)
+//			.subscribe().withSubscriber(AssertSubscriber.create(2L))
+//			.assertSubscribed()
+//			.awaitItems(2, Duration.ofMinutes(1))
+//			.assertCompleted()
+//			.getItems();
+//
+//		// Check the fruits I got from the channel
+//		checkFruits(fruitsFromChannel);
+		Thread.sleep(30 * 1000);
 
 		// Check the fruits in the database - they should be the same
 		checkFruits(Fruit.<Fruit>listAll().await().atMost(Duration.ofSeconds(5)));
