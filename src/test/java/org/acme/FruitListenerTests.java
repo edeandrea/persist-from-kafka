@@ -29,7 +29,7 @@ class FruitListenerTests {
 	Multi<Fruit> persistedFruitsChannel;
 
 	@Test
-	public void itemsPersist() throws InterruptedException {
+	public void itemsPersist() {
 		assertThat(Fruit.count().await().atMost(Duration.ofSeconds(5)))
 			.isNotNull()
 			.isZero();
