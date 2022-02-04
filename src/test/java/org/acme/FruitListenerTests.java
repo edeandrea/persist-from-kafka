@@ -34,11 +34,12 @@ class FruitListenerTests {
 			.isNotNull()
 			.isZero();
 
+		// Publish a few fruits to Kafka
 		createSampleFruits().stream()
 			.map(fruit -> new ProducerRecord<String, Fruit>("fruits", fruit))
 			.forEach(fruitsProducer::send);
 
-		// Wait for the messages to arrive
+		// Wait for the messages to arrive on the outgoing channel
 		var fruitsFromChannel = this.persistedFruitsChannel
 			.select().first(2L)
 			.subscribe().withSubscriber(AssertSubscriber.create(2L))
@@ -50,7 +51,7 @@ class FruitListenerTests {
 		// Check the fruits I got from the channel
 		checkFruits(fruitsFromChannel);
 
-		// Check the fruits in the database
+		// Check the fruits in the database - they should be the same
 		checkFruits(Fruit.<Fruit>listAll().await().atMost(Duration.ofSeconds(5)));
 
 		// Cleanup
